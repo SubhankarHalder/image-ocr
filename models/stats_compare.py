@@ -18,11 +18,13 @@ class Stats:
     def get_variance(self, keras_grp, tess_grp):
         return np.var(keras_grp), np.var(tess_grp)
 
-    def publish_output(self, res, mean_string):
+    def publish_output(self, res, mean_string, var_string):
         with open(self.output_text_file, 'w') as f:
             f.write(res)
             f.write("\n")
             f.write(mean_string)
+            f.write("\n")
+            f.write(var_string)
     
     def driver(self):
         keras_grp = np.array(self.df_keras["CER"].tolist())
@@ -31,6 +33,7 @@ class Stats:
         keras_mean, tess_mean = self.get_mean(keras_grp, tess_grp)
         print(keras_mean, tess_mean)
         mean_string = "Keras CER Mean = " + str(keras_mean) + " Tesseract CER Mean = " + str(tess_mean)
+        var_string = "Keras CER Var = " + str(keras_var) + " Tesseract CER Var = " + str(tess_var)
         var_ratio = tess_var/keras_var
         if var_ratio > 4:
             res = stats.ttest_ind(a=keras_grp, b=tess_grp, equal_var=False)
@@ -38,7 +41,7 @@ class Stats:
             res = stats.ttest_ind(a=keras_grp, b=tess_grp, equal_var=True)
         res = str(res)
         print(res)
-        self.publish_output(res, mean_string)
+        self.publish_output(res, mean_string, var_string)
         
 
 if __name__ == "__main__":
